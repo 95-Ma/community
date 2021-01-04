@@ -1,0 +1,1 @@
+ALTER TABLE c_user ADD bio Varchar(256) NULL;
