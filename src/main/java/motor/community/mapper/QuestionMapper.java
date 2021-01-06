@@ -42,4 +42,17 @@ public interface QuestionMapper {
      */
     @Select("select count(1) from question")
     Integer questionCount();
+
+    /**
+     * 根据用户id、偏移位置和偏移量查找特定问题列表
+     */
+    @Select(value = "select * from question where creator = #{userId} limit #{offset},#{size}")
+    List<Question> getAllQuestionByUserId(@Param("userId") Integer userId, @Param("offset") Integer offset, @Param("size") Integer size);
+
+
+    /**
+     * 根据用户id查找特定问题列表总记录条数
+     */
+    @Select("select count(1) from question where creator = #{userId}")
+    Integer questionCountByUserId(@Param("userId") Integer userId);
 }

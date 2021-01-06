@@ -27,10 +27,10 @@ import java.util.List;
 public class IndexController {
 
     @Resource
-    UserMapper userMapper;
+    private UserMapper userMapper;
 
     @Resource
-    QuestionService questionService;
+    private QuestionService questionService;
 
     /**
      * 首页控制器
