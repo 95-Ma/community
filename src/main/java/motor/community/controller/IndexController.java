@@ -1,6 +1,7 @@
 package motor.community.controller;
 
 import com.zaxxer.hikari.HikariJNDIFactory;
+import motor.community.dto.PaginationDTO;
 import motor.community.dto.QuestionDTO;
 import motor.community.mapper.QuestionMapper;
 import motor.community.mapper.UserMapper;
@@ -36,11 +37,15 @@ public class IndexController {
      *
      * @param request
      * @param model
+     * @param page    页数
+     * @param size    每页显示几条问题
      * @return 首页
      */
     @GetMapping("/")
     public String index(HttpServletRequest request,
-                        Model model) {
+                        Model model,
+                        @RequestParam(value = "page", defaultValue = "1") Integer page,
+                        @RequestParam(value = "size", defaultValue = "5") Integer size) {
         // 获取当前cookies集合
         Cookie[] cookies = request.getCookies();
         // 非空判断
@@ -55,9 +60,10 @@ public class IndexController {
                 }
             }
         }
-        // 将问题列表存放到Request域中
-        List<QuestionDTO> questionDTOList = questionService.getAllQuestionDTO();
-        model.addAttribute("questions", questionDTOList);
+        // 根据page和size返回页码DTO对象
+        PaginationDTO pagination = questionService.getAllQuestionDTO(page, size);
+        // 将页码DTO对象存放到Request域中
+        model.addAttribute("pagination", pagination);
         // 返回首页
         return "index";
     }

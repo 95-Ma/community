@@ -1,5 +1,6 @@
 package motor.community.servie;
 
+import motor.community.dto.PaginationDTO;
 import motor.community.dto.QuestionDTO;
 import motor.community.mapper.QuestionMapper;
 import motor.community.mapper.UserMapper;
@@ -30,11 +31,34 @@ public class QuestionService {
     /**
      * 调用持久化层接口方法获取QuestionDTO集合
      *
-     * @return questionDTO集合
+     * @param page 页数
+     * @param size 显示条数
+     * @return PaginationDTO
      */
-    public List<QuestionDTO> getAllQuestionDTO() {
-        List<Question> questions = questionMapper.getAllQuestion();
+    public PaginationDTO getAllQuestionDTO(Integer page, Integer size) {
+        // 新建页码DTO对象
+        PaginationDTO paginationDTO = new PaginationDTO();
+        // 获取问题列表总记录数
+        Integer totalCount = questionMapper.questionCount();
+        // 对传入参数page的简单限制
+        if (page < 1) {
+            page = 1;
+        }
+        if (page > paginationDTO.getTotalPageByCount(totalCount, size)) {
+            page = paginationDTO.getTotalPageByCount(totalCount, size);
+        }
+        // 根据总记录数，页数和显示条数获取paginationDTO
+        paginationDTO.setPagination(totalCount, page, size);
+
+
+        // 偏移位置
+        Integer offset = size * (page - 1);
+        // 获取问题列表（不含用户信息）
+        List<Question> questions = questionMapper.getAllQuestion(offset, size);
+        // 新建问题DTO列表（包含用户信息）
         List<QuestionDTO> questionDTOList = new ArrayList<>();
+
+        // 遍历问题列表，根据creator查询用户信息并注入问题DTO
         for (Question question : questions) {
             User user = userMapper.findById(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
@@ -42,6 +66,9 @@ public class QuestionService {
             questionDTO.setUser(user);
             questionDTOList.add(questionDTO);
         }
-        return questionDTOList;
+        // 将遍历获取的特定问题列表（包含用户信息）注入paginationDTO
+        paginationDTO.setQuestions(questionDTOList);
+
+        return paginationDTO;
     }
 }
