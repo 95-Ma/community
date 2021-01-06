@@ -6,6 +6,7 @@
 
     <!-- 引入bootstrap -->
     <link rel="stylesheet" href="/webjars/bootstrap/3.3.5/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="css/community.css"/>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script src="/webjars/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 </head>
@@ -18,7 +19,7 @@
                     data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                 <span class="sr-only">码酱社区</span>
             </button>
-            <a class="navbar-brand" href="#">码酱社区</a>
+            <a class="navbar-brand" href="/">码酱社区</a>
         </div>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <form class="navbar-form navbar-left">
@@ -28,6 +29,11 @@
                 <button type="submit" class="btn btn-default">搜索</button>
             </form>
             <ul class="nav navbar-nav navbar-right">
+                <!-- 用户未登陆时不显示“发布”-->
+                <li th:if="${session.user != null}">
+                    <a href="/publish">发布</a>
+                </li>
+                <!-- 用户未登录时不显示用户相关信息-->
                 <li class="dropdown" th:if="${session.user != null}">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                        aria-expanded="false" th:text="${session.user.getName()}"><span class="caret"></span></a>
@@ -37,6 +43,7 @@
                         <li><a href="#">退出登录</a></li>
                     </ul>
                 </li>
+                <!-- 用户未登录时显示登录按钮-->
                 <li th:unless="${session.user != null}">
                     <a href="https://github.com/login/oauth/authorize?client_id=7241610e10cf301ed6d3&redirect_uri=http://localhost:8080/callback&scope=user&state=1">登录</a>
                 </li>
@@ -45,5 +52,42 @@
     </div>
 </nav>
 <!-- 导航栏-->
+<div class="container-fluid main">
+    <div class="row">
+        <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+            <h3><span class="glyphicon glyphicon-list" aria-hidden="true"></span> 发现</h3>
+
+            <!-- 遍历问题列表-->
+            <div class="media" th:each="question : ${questions}">
+                <div class="media-left">
+                    <!-- 用户头像-->
+                    <a href="#">
+                        <img class="media-object img-rounded"
+                             th:src="${question.user.avatarUrl}">
+                    </a>
+                </div>
+                <div class="media-body">
+                    <!-- 问题标题-->
+                    <h4 class="media-heading">
+                        <a th:href="@{'/question/'+ ${question.id}}" th:text="${question.title}"></a>
+                    </h4>
+                    <!-- 问题内容描述-->
+                    <span th:text="${question.description}"></span><br>
+                    <!-- 问题回复量、浏览量和创建时间-->
+                    <span class="text-desc"><span th:text="${question.commentCount}"></span> 个回复 • <span
+                            th:text="${question.viewCount}"></span> 次浏览 • <span
+                            th:text="${#dates.format(question.gmtCreate,'yyyy-MM-dd HH:mm')}"></span></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+            <!--相关问题-->
+            <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h4>热门标签</h4>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

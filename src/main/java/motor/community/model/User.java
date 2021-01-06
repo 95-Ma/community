@@ -1,62 +1,27 @@
 package motor.community.model;
 
+import lombok.Data;
+
 /**
+ * 论坛用户，封装用户信息
+ *
  * @author motor
  * @create 2021-01-03-21:06
  */
+@Data
 public class User {
+    // 序号
     private Integer id;
+    // 昵称
     private String name;
+    // 用户id
     private String accountId;
+    // 用户访问令牌
     private String token;
+    // 创建时间
     private Long gmtCreate;
+    // 修改时间
     private Long gmtModified;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public Long getGmtCreate() {
-        return gmtCreate;
-    }
-
-    public void setGmtCreate(Long gmtCreate) {
-        this.gmtCreate = gmtCreate;
-    }
-
-    public Long getGmtModified() {
-        return gmtModified;
-    }
-
-    public void setGmtModified(Long gmtModified) {
-        this.gmtModified = gmtModified;
-    }
+    // 用户头像地址
+    private String avatarUrl;
 }

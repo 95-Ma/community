@@ -1,6 +1,6 @@
 package motor.community.controller;
 
-import motor.community.dto.GithubUser;
+import motor.community.dto.GithubUserDTO;
 import motor.community.mapper.UserMapper;
 import motor.community.model.User;
 import motor.community.provider.GithubProvider;
@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
 /**
+ * 获取Github授权控制器
+ *
  * @author motor
  * @create 2021-01-02-14:08
  */
@@ -27,37 +29,55 @@ public class AuthorizeController {
     @Autowired
     private GithubProvider githubProvider;
 
+    // 服务器id
     @Value("${github.client.id}")
     private String clientId;
+    // 服务器密钥
     @Value("${github.client.secret}")
     private String clientSecret;
+    // 回调地址
     @Value("${github.redirect.uri}")
     private String redirectUri;
 
     @Resource
     private UserMapper userMapper;
 
+    /**
+     * 当访问回调地址时进入该控制器
+     *
+     * @param code     携带code
+     * @param state    服务器状态
+     * @param request  原生请求API
+     * @param response 原生响应API
+     * @return 不管成功失败都重定向到首页
+     */
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
                            @RequestParam(name = "state") String state,
                            HttpServletRequest request,
                            HttpServletResponse response) {
+        // 配置访问令牌数据传输对象
         AccessTokenDTO accessTokenDTO = new AccessTokenDTO();
         accessTokenDTO.setClient_id(clientId);
         accessTokenDTO.setClient_secret(clientSecret);
         accessTokenDTO.setRedirect_uri(redirectUri);
         accessTokenDTO.setState(state);
         accessTokenDTO.setCode(code);
+        // 获取访问令牌
         String tokenAccess = githubProvider.getAccessToken(accessTokenDTO);
-        GithubUser githubUser = githubProvider.getUser(tokenAccess);
-        if (githubUser != null) {
+        // 获取Github用户数据传输对象
+        GithubUserDTO githubUserDTO = githubProvider.getUser(tokenAccess);
+        // 判断Github用户数据传输对象获取是否成功
+        if (githubUserDTO != null && githubUserDTO.getId() != null) {
+            // 创建用户对象，并注入属性，最后将数据持久化
             User user = new User();
             String token = UUID.randomUUID().toString();
             user.setToken(token);
-            user.setName(githubUser.getName());
-            user.setAccountId(String.valueOf(githubUser.getId()));
+            user.setName(githubUserDTO.getName());
+            user.setAccountId(String.valueOf(githubUserDTO.getId()));
             user.setGmtCreate(System.currentTimeMillis());
             user.setGmtModified(user.getGmtCreate());
+            user.setAvatarUrl(githubUserDTO.getAvatar_url());
             userMapper.insert(user);
             // 登录成功，将随机生成的UUID写入cookie作为用户登录令牌
             response.addCookie(new Cookie("token", token));
