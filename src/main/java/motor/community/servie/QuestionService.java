@@ -107,4 +107,23 @@ public class QuestionService {
 
         return paginationDTO;
     }
+
+    /**
+     * 将传入参数作为形参调用持久层接口方法查询相关数据
+     *
+     * @param id
+     * @return
+     */
+    public QuestionDTO getById(Integer id) {
+        // 返回特定问题
+        Question question = questionMapper.getById(id);
+        // 将question对象相同属性注入questionDTO对象中
+        QuestionDTO questionDTO = new QuestionDTO();
+        BeanUtils.copyProperties(question, questionDTO);
+        // 返回用户信息
+        User user = userMapper.findById(question.getCreator());
+        // 注入用户信息属性到questionDTO对象
+        questionDTO.setUser(user);
+        return questionDTO;
+    }
 }
