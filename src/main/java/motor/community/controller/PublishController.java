@@ -28,8 +28,6 @@ public class PublishController {
     @Resource
     private QuestionMapper questionMapper;
 
-    @Resource
-    private UserMapper userMapper;
 
     @GetMapping("/publish")
     public String publish() {
@@ -71,21 +69,9 @@ public class PublishController {
         model.addAttribute("description", description);
         model.addAttribute("tag", tag);
 
-        User user = null;
-        // 获取 cookie集合
-        Cookie[] cookies = request.getCookies();
-        // 对集合进行非空判断
-        if (cookies != null || cookies.length != 0) {
-            // 遍历集合获取key为token的cookie，调用findByToken方法获取用户并存放到Session域中
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("token")) {
-                    String token = cookie.getValue();
-                    user = userMapper.findByToken(token);
-                    if (user != null) request.getSession().setAttribute("user", user);
-                    break;
-                }
-            }
-        }
+        // 获取Session域中的用户信息
+        User user = (User) request.getSession().getAttribute("user");
+
         // 如果用户未登录，提示错误信息
         if (user == null) {
             model.addAttribute("error", "用户未登录");

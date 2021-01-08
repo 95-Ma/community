@@ -24,8 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class ProfileController {
 
-    @Resource
-    private UserMapper userMapper;
 
     @Resource
     private QuestionService questionService;
@@ -43,22 +41,9 @@ public class ProfileController {
                           Model model,
                           @RequestParam(value = "page", defaultValue = "1") Integer page,
                           @RequestParam(value = "size", defaultValue = "5") Integer size) {
-        // 用户信息
-        User user = null;
-        // 获取当前cookies集合
-        Cookie[] cookies = request.getCookies();
-        // 非空判断
-        if (cookies != null && cookies.length != 0) {
-            // 遍历并获取key为token的cookie，再根据token查找用户并将用户存放到Session域中
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("token")) {
-                    String token = cookie.getValue();
-                    user = userMapper.findByToken(token);
-                    if (user != null) request.getSession().setAttribute("user", user);
-                    break;
-                }
-            }
-        }
+
+        // 获取Session域中的用户信息
+        User user = (User) request.getSession().getAttribute("user");
 
         // 如果用户未登录，重定向回首页
         if (user == null) {
