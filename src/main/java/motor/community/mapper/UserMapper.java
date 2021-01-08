@@ -1,10 +1,7 @@
 package motor.community.mapper;
 
 import motor.community.model.User;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
 
@@ -27,19 +24,22 @@ public interface UserMapper {
 
     /**
      * 根据token信息查询用户
-     *
-     * @param token
-     * @return
      */
     @Select(value = "select * from c_user where token = #{token}")
     User findByToken(@Param(value = "token") String token);
 
     /**
      * 根据用户id查询用户
-     *
-     * @param id
-     * @return
      */
     @Select(value = "select * from c_user where \"id\" = #{id}")
     User findById(@Param(value = "id") Integer id);
+
+    /**
+     * 根据Account_id查询用户
+     */
+    @Select(value = "select * from c_user where account_id = #{accountId}")
+    User findByAccountId(@Param(value = "accountId") String accountId);
+
+    @Update(value = "update c_user set name = #{name}, token = #{token}, gmt_modified = #{gmtModified}, avatar_url = #{avatarUrl} where \"id\" = #{id}")
+    void update(User dbUser);
 }

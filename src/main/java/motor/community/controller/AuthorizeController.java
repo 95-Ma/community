@@ -5,6 +5,7 @@ import motor.community.mapper.UserMapper;
 import motor.community.model.User;
 import motor.community.provider.GithubProvider;
 import motor.community.dto.AccessTokenDTO;
+import motor.community.servie.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -40,7 +41,7 @@ public class AuthorizeController {
     private String redirectUri;
 
     @Resource
-    private UserMapper userMapper;
+    private UserService userService;
 
     /**
      * 当访问回调地址时进入该控制器
@@ -75,10 +76,9 @@ public class AuthorizeController {
             user.setToken(token);
             user.setName(githubUserDTO.getName());
             user.setAccountId(String.valueOf(githubUserDTO.getId()));
-            user.setGmtCreate(System.currentTimeMillis());
-            user.setGmtModified(user.getGmtCreate());
             user.setAvatarUrl(githubUserDTO.getAvatar_url());
-            userMapper.insert(user);
+            // 判断用户是否创建或更新相关信息
+            userService.createOrUpdate(user);
             // 登录成功，将随机生成的UUID写入cookie作为用户登录令牌
             response.addCookie(new Cookie("token", token));
             return "redirect:/";
@@ -86,5 +86,19 @@ public class AuthorizeController {
             // 登录失败，重新登录
             return "redirect:/";
         }
+    }
+
+    /**
+     * 退出登录控制器，清除token的Cookie以及Session域中的user
+     */
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
+        // 移除Session域中的user
+        request.getSession().removeAttribute("user");
+        // 清除Cookie中的token
+        Cookie cookie = new Cookie("token", null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        return "redirect:/";
     }
 }
