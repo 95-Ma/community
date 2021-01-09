@@ -1,14 +1,17 @@
 package motor.community.controller;
 
 import com.sun.media.sound.ModelDestination;
+import motor.community.dto.QuestionDTO;
 import motor.community.mapper.QuestionMapper;
 import motor.community.mapper.UserMapper;
 import motor.community.model.Question;
 import motor.community.model.User;
+import motor.community.servie.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -25,9 +28,24 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class PublishController {
 
-    @Resource
-    private QuestionMapper questionMapper;
 
+    @Resource
+    private QuestionService questionService;
+
+    /**
+     * 编辑控制器
+     */
+    @GetMapping("/publish/{id}")
+    public String edit(@PathVariable(name = "id") Integer id, Model model) {
+        // 获取问题
+        QuestionDTO question = questionService.getById(id);
+        // 将问题相关信息传入Request域中并数据回显
+        model.addAttribute("title", question.getTitle());
+        model.addAttribute("description", question.getDescription());
+        model.addAttribute("tag", question.getTag());
+        model.addAttribute("id", question.getId());
+        return "publish";
+    }
 
     @GetMapping("/publish")
     public String publish() {
@@ -49,6 +67,7 @@ public class PublishController {
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "tag", required = false) String tag,
+            @RequestParam(value = "id", required = false) Integer id,
             HttpServletRequest request,
             Model model) {
         if (title == null || title == "") {
@@ -77,7 +96,7 @@ public class PublishController {
             model.addAttribute("error", "用户未登录");
             return "publish";
         }
-        // 用户提交的问题相关信息数据持久化
+        // 用户提交的问题相关信息数据交由逻辑层判断是否更新或插入
         Question question = new Question();
         question.setTag(tag);
         question.setTitle(title);
@@ -85,7 +104,9 @@ public class PublishController {
         question.setCreator(user.getId());
         question.setGmtCreate(System.currentTimeMillis());
         question.setGmtModified(question.getGmtCreate());
-        questionMapper.create(question);
+        question.setId(id);
+        // 调用逻辑层判断执行方法
+        questionService.createOrUpdate(question);
         return "redirect:/";
     }
 }

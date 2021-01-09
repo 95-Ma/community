@@ -6,7 +6,7 @@
 
     <!-- 引入bootstrap -->
     <link rel="stylesheet" href="/webjars/bootstrap/3.3.5/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="css/community.css"/>
+    <link rel="stylesheet" href="/css/community.css"/>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script src="/webjars/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 </head>
@@ -21,6 +21,8 @@
             <hr>
 
             <form action="/publish" method="post">
+                <!-- 传递问题id-->
+                <input type="hidden" name="id" th:value="${id}">
                 <!-- 问题标题-->
                 <div class="form-group">
                     <label for="title">问题标题（简单扼要）:</label>

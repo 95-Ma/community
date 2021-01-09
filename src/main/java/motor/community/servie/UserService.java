@@ -2,9 +2,11 @@ package motor.community.servie;
 
 import motor.community.mapper.UserMapper;
 import motor.community.model.User;
+import motor.community.model.UserExample;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 用户类业务逻辑
@@ -25,9 +27,11 @@ public class UserService {
      */
     public void createOrUpdate(User user) {
         // 根据AccountId获取user
-        User dbUser = userMapper.findByAccountId(user.getAccountId());
+        UserExample userExample = new UserExample();
+        userExample.createCriteria().andAccountIdEqualTo(user.getAccountId());
+        List<User> users = userMapper.selectByExample(userExample);
         // 非空判断
-        if (dbUser == null) {
+        if (users.size() == 0) {
             // 设置创建事件和修改时间
             user.setGmtCreate(System.currentTimeMillis());
             user.setGmtModified(user.getGmtCreate());
@@ -35,11 +39,15 @@ public class UserService {
             userMapper.insert(user);
         } else {
             // 更新可能变更的用户信息
-            dbUser.setGmtModified(System.currentTimeMillis());
-            dbUser.setAvatarUrl(user.getAvatarUrl());
-            dbUser.setName(user.getName());
-            dbUser.setToken(user.getToken());
-            userMapper.update(dbUser);
+            User dbUser = users.get(0);
+            User updateUser = new User();
+            updateUser.setGmtModified(System.currentTimeMillis());
+            updateUser.setAvatarUrl(user.getAvatarUrl());
+            updateUser.setName(user.getName());
+            updateUser.setToken(user.getToken());
+            UserExample updateUserExample = new UserExample();
+            updateUserExample.createCriteria().andIdEqualTo(dbUser.getId());
+            userMapper.updateByExampleSelective(updateUser, updateUserExample);
         }
     }
 }

@@ -5,7 +5,9 @@ import motor.community.dto.QuestionDTO;
 import motor.community.mapper.QuestionMapper;
 import motor.community.mapper.UserMapper;
 import motor.community.model.Question;
+import motor.community.model.QuestionExample;
 import motor.community.model.User;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +40,7 @@ public class QuestionService {
         // 新建页码DTO对象
         PaginationDTO paginationDTO = new PaginationDTO();
         // 获取问题列表总记录数
-        Integer totalCount = questionMapper.questionCount();
+        Integer totalCount = (int) questionMapper.countByExample(new QuestionExample());
         // 对传入参数page的简单限制
         if (page < 1) {
             page = 1;
@@ -53,13 +55,14 @@ public class QuestionService {
         // 偏移位置
         Integer offset = size * (page - 1);
         // 获取问题列表（不含用户信息）
-        List<Question> questions = questionMapper.getAllQuestion(offset, size);
+        List<Question> questions = questionMapper.selectByExampleWithRowbounds(new QuestionExample(), new RowBounds(offset, size));
         // 新建问题DTO列表（包含用户信息）
         List<QuestionDTO> questionDTOList = new ArrayList<>();
 
         // 遍历问题列表，根据creator查询用户信息并注入问题DTO
         for (Question question : questions) {
-            User user = userMapper.findById(question.getCreator());
+            System.out.println(question);
+            User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             BeanUtils.copyProperties(question, questionDTO);
             questionDTO.setUser(user);
@@ -75,7 +78,9 @@ public class QuestionService {
         // 新建页码DTO对象
         PaginationDTO paginationDTO = new PaginationDTO();
         // 获取特定用户的问题列表总记录数
-        Integer totalCount = questionMapper.questionCountByUserId(userId);
+        QuestionExample questionExample = new QuestionExample();
+        questionExample.createCriteria().andCreatorEqualTo(userId);
+        Integer totalCount = (int) questionMapper.countByExample(questionExample);
         // 对传入参数page的简单限制
         if (page < 1) {
             page = 1;
@@ -90,13 +95,15 @@ public class QuestionService {
         // 偏移位置
         Integer offset = size * (page - 1);
         // 获取问题列表（不含用户信息）
-        List<Question> questions = questionMapper.getAllQuestionByUserId(userId, offset, size);
+        QuestionExample example = new QuestionExample();
+        example.createCriteria().andCreatorEqualTo(userId);
+        List<Question> questions = questionMapper.selectByExampleWithRowbounds(example, new RowBounds(offset, size));
         // 新建问题DTO列表（包含用户信息）
         List<QuestionDTO> questionDTOList = new ArrayList<>();
 
         // 遍历问题列表，根据creator查询用户信息并注入问题DTO
         for (Question question : questions) {
-            User user = userMapper.findById(question.getCreator());
+            User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             BeanUtils.copyProperties(question, questionDTO);
             questionDTO.setUser(user);
@@ -116,14 +123,37 @@ public class QuestionService {
      */
     public QuestionDTO getById(Integer id) {
         // 返回特定问题
-        Question question = questionMapper.getById(id);
+        Question question = questionMapper.selectByPrimaryKey(id);
         // 将question对象相同属性注入questionDTO对象中
         QuestionDTO questionDTO = new QuestionDTO();
         BeanUtils.copyProperties(question, questionDTO);
         // 返回用户信息
-        User user = userMapper.findById(question.getCreator());
+        User user = userMapper.selectByPrimaryKey(question.getCreator());
         // 注入用户信息属性到questionDTO对象
         questionDTO.setUser(user);
         return questionDTO;
+    }
+
+    /**
+     * 根据问题id判断是否更新数据库信息或插入数据到数据库
+     */
+    public void createOrUpdate(Question question) {
+        if (question.getId() == null) {
+            // 创建问题
+            question.setGmtCreate(System.currentTimeMillis());
+            question.setGmtModified(question.getGmtCreate());
+            questionMapper.insert(question);
+        } else {
+            // 更新问题
+            Question updateQuestion = new Question();
+            updateQuestion.setGmtModified(System.currentTimeMillis());
+            updateQuestion.setTitle(question.getTitle());
+            updateQuestion.setTag(question.getTag());
+            updateQuestion.setDescription(question.getDescription());
+            updateQuestion.setCreator(question.getCreator());
+            QuestionExample questionExample = new QuestionExample();
+            questionExample.createCriteria().andIdEqualTo(question.getId());
+            questionMapper.updateByExample(updateQuestion, questionExample);
+        }
     }
 }
