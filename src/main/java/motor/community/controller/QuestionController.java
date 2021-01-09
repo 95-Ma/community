@@ -1,8 +1,7 @@
 package motor.community.controller;
 
 import motor.community.dto.QuestionDTO;
-import motor.community.mapper.QuestionMapper;
-import motor.community.servie.QuestionService;
+import motor.community.service.QuestionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

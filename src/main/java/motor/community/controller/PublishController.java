@@ -1,13 +1,9 @@
 package motor.community.controller;
 
-import com.sun.media.sound.ModelDestination;
 import motor.community.dto.QuestionDTO;
-import motor.community.mapper.QuestionMapper;
-import motor.community.mapper.UserMapper;
 import motor.community.model.Question;
 import motor.community.model.User;
-import motor.community.servie.QuestionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import motor.community.service.QuestionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.Resource;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 /**

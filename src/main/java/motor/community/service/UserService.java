@@ -1,4 +1,4 @@
-package motor.community.servie;
+package motor.community.service;
 
 import motor.community.mapper.UserMapper;
 import motor.community.model.User;

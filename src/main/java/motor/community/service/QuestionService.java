@@ -1,5 +1,7 @@
-package motor.community.servie;
+package motor.community.service;
 
+import motor.community.Exception.CustomizeErrorCode;
+import motor.community.Exception.CustomizeException;
 import motor.community.dto.PaginationDTO;
 import motor.community.dto.QuestionDTO;
 import motor.community.mapper.QuestionMapper;
@@ -61,7 +63,6 @@ public class QuestionService {
 
         // 遍历问题列表，根据creator查询用户信息并注入问题DTO
         for (Question question : questions) {
-            System.out.println(question);
             User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             BeanUtils.copyProperties(question, questionDTO);
@@ -124,6 +125,10 @@ public class QuestionService {
     public QuestionDTO getById(Integer id) {
         // 返回特定问题
         Question question = questionMapper.selectByPrimaryKey(id);
+        // 假如查询失败
+        if (question == null) {
+            throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+        }
         // 将question对象相同属性注入questionDTO对象中
         QuestionDTO questionDTO = new QuestionDTO();
         BeanUtils.copyProperties(question, questionDTO);
@@ -153,7 +158,11 @@ public class QuestionService {
             updateQuestion.setCreator(question.getCreator());
             QuestionExample questionExample = new QuestionExample();
             questionExample.createCriteria().andIdEqualTo(question.getId());
-            questionMapper.updateByExample(updateQuestion, questionExample);
+            int update = questionMapper.updateByExample(updateQuestion, questionExample);
+            // 当更新操作失败时
+            if (update != 1) {
+                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+            }
         }
     }
 }
