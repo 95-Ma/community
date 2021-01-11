@@ -12,7 +12,7 @@ import motor.community.model.User;
 @Data
 public class QuestionDTO {
     // 序号
-    private int id;
+    private Long id;
     // 标题
     private String title;
     // 内容描述
@@ -24,7 +24,7 @@ public class QuestionDTO {
     // 修改时间
     private Long gmtModified;
     // 发起者
-    private Integer creator;
+    private Long creator;
     // 阅读量
     private Integer viewCount;
     // 评论数

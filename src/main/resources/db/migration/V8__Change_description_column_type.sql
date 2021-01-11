@@ -1,0 +1,1 @@
+alter table QUESTION alter column description varchar(1024);

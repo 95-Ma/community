@@ -28,10 +28,13 @@ public class QuestionController {
      * @return
      */
     @GetMapping("/question/{id}")
-    public String question(@PathVariable(name = "id") Integer id,
+    public String question(@PathVariable(name = "id") Long id,
                            Model model) {
         // 调用业务逻辑层接口方法查询问题列表和用户信息
         QuestionDTO questionDTO = questionService.getById(id);
+        // 累加阅读数
+        questionService.incView(id);
+        System.out.println(questionDTO);
         // 存入Request域中
         model.addAttribute("question", questionDTO);
         return "question";

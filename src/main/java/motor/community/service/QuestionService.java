@@ -1,9 +1,10 @@
 package motor.community.service;
 
-import motor.community.Exception.CustomizeErrorCode;
-import motor.community.Exception.CustomizeException;
+import motor.community.exception.CustomizeErrorCode;
+import motor.community.exception.CustomizeException;
 import motor.community.dto.PaginationDTO;
 import motor.community.dto.QuestionDTO;
+import motor.community.mapper.QuestionExtMapper;
 import motor.community.mapper.QuestionMapper;
 import motor.community.mapper.UserMapper;
 import motor.community.model.Question;
@@ -32,8 +33,12 @@ public class QuestionService {
     @Resource
     private QuestionMapper questionMapper;
 
+    @Resource
+    private QuestionExtMapper questionExtMapper;
+
     /**
      * 调用持久化层接口方法获取QuestionDTO集合
+     *
      * @param page 页数
      * @param size 显示条数
      * @return PaginationDTO
@@ -75,7 +80,7 @@ public class QuestionService {
         return paginationDTO;
     }
 
-    public PaginationDTO getAllQuestionDTO(Integer userId, Integer page, Integer size) {
+    public PaginationDTO getAllQuestionDTO(Long userId, Integer page, Integer size) {
         // 新建页码DTO对象
         PaginationDTO paginationDTO = new PaginationDTO();
         // 获取特定用户的问题列表总记录数
@@ -122,7 +127,7 @@ public class QuestionService {
      * @param id
      * @return
      */
-    public QuestionDTO getById(Integer id) {
+    public QuestionDTO getById(Long id) {
         // 返回特定问题
         Question question = questionMapper.selectByPrimaryKey(id);
         // 假如查询失败
@@ -147,6 +152,9 @@ public class QuestionService {
             // 创建问题
             question.setGmtCreate(System.currentTimeMillis());
             question.setGmtModified(question.getGmtCreate());
+            question.setViewCount(0);
+            question.setLikeCount(0);
+            question.setCommentCount(0);
             questionMapper.insert(question);
         } else {
             // 更新问题
@@ -164,5 +172,15 @@ public class QuestionService {
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
         }
+    }
+
+    /**
+     * 将阅读量加一并存放到数据库中
+     */
+    public void incView(Long id) {
+        Question question = new Question();
+        question.setId(id);
+        question.setViewCount(1);
+        questionExtMapper.incView(question);
     }
 }

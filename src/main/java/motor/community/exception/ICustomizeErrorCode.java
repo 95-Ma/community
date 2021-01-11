@@ -1,4 +1,4 @@
-package motor.community.Exception;
+package motor.community.exception;
 
 /**
  * 错误码接口
@@ -12,4 +12,9 @@ public interface ICustomizeErrorCode {
      * 获取错误信息
      */
     String getMessage();
+
+    /**
+     * 获取错误码
+     */
+    Integer getCode();
 }

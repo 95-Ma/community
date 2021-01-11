@@ -1,10 +1,12 @@
 package motor.community.advice;
 
-import motor.community.Exception.CustomizeException;
-import org.springframework.http.HttpStatus;
+import motor.community.dto.ResultDTO;
+import motor.community.exception.CustomizeErrorCode;
+import motor.community.exception.CustomizeException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,18 +21,29 @@ import javax.servlet.http.HttpServletRequest;
 public class CustomizeExceptionHandler {
 
     /**
-     * 将异常信息存放到Request域中
+     * 判断传入数据是否为json格式，是的话返回json提示数据，否则输出不同提示信息并跳转到错误页面
      */
     @ExceptionHandler(Exception.class)
-    ModelAndView handle(HttpServletRequest request, Throwable ex, Model model) {
-        // 判断异常是否为自定义异常
-        if (ex instanceof CustomizeException) {
-            model.addAttribute("message", ex.getMessage());
+    @ResponseBody
+    Object handle(HttpServletRequest request, Throwable ex, Model model) {
+        String contentType = request.getContentType();
+        if ("application/json".equals(contentType)) {
+            // 返回json数据
+            // 判断异常是否为自定义异常
+            if (ex instanceof CustomizeException) {
+                return ResultDTO.errorOf((CustomizeException) ex);
+            } else {
+                return ResultDTO.errorOf(CustomizeErrorCode.SYSTEM_ERROR);
+            }
         } else {
-            model.addAttribute("message", "服务有点小问题，稍后再来试试吧~");
+            // 判断异常是否为自定义异常
+            if (ex instanceof CustomizeException) {
+                model.addAttribute("message", ex.getMessage());
+            } else {
+                model.addAttribute("message", CustomizeErrorCode.SYSTEM_ERROR.getMessage());
+            }
+            // 跳转到error.html
+            return new ModelAndView("error");
         }
-        // 跳转到error.html
-        return new ModelAndView("error");
     }
-
 }

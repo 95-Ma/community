@@ -1,11 +1,10 @@
 package motor.community.controller;
 
 import motor.community.dto.GithubUserDTO;
-import motor.community.mapper.UserMapper;
 import motor.community.model.User;
 import motor.community.provider.GithubProvider;
 import motor.community.dto.AccessTokenDTO;
-import motor.community.servie.UserService;
+import motor.community.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
