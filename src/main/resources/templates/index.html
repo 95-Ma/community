@@ -10,6 +10,16 @@
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script src="/webjars/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 </head>
+<script type="application/javascript">
+    <!--判断该页面是否为跳转登录页面,是的话则关闭-->
+    window.onload = function () {
+        var closable = window.localStorage.getItem("closable");
+        if (closable) {
+            window.close();
+            window.localStorage.removeItem("closable");
+        }
+    }
+</script>
 <body>
 <!-- 导入导航栏-->
 <div th:insert="~{navigation :: nav}"></div>
