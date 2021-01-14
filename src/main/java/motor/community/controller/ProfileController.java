@@ -1,7 +1,10 @@
 package motor.community.controller;
 
+import motor.community.dto.NotificationDTO;
 import motor.community.dto.PaginationDTO;
+import motor.community.dto.QuestionDTO;
 import motor.community.model.User;
+import motor.community.service.NotificationService;
 import motor.community.service.QuestionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 个人中心控制器
@@ -24,6 +28,9 @@ public class ProfileController {
 
     @Resource
     private QuestionService questionService;
+
+    @Resource
+    private NotificationService notificationService;
 
     /**
      * 个人中心控制器
@@ -52,15 +59,19 @@ public class ProfileController {
         if ("questions".contains(action)) {
             model.addAttribute("section", "questions");
             model.addAttribute("sectionName", "我的提问");
+            // 根据用户id、页码和每页条数获取问题列表
+            PaginationDTO<QuestionDTO> paginationDTO = questionService.getAllQuestionDTO(user.getId(), page, size);
+            // 将返回的paginationDTO对象放入Request域中
+            model.addAttribute("pagination", paginationDTO);
         } else if ("replies".contains(action)) {
+            PaginationDTO<NotificationDTO> paginationDTO = notificationService.list(user.getId(), page, size);
+            Long unreadCount = notificationService.unreadCount(user.getId());
             model.addAttribute("section", "replies");
+            model.addAttribute("pagination", paginationDTO);
             model.addAttribute("sectionName", "最新回复");
+
         }
 
-        // 根据用户id、页码和每页条数获取问题列表
-        PaginationDTO paginationDTO = questionService.getAllQuestionDTO(user.getId(), page, size);
-        // 将返回的paginationDTO对象放入Request域中
-        model.addAttribute("paginationDTO", paginationDTO);
         return "profile";
     }
 }

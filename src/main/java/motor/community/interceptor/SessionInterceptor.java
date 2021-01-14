@@ -1,8 +1,10 @@
 package motor.community.interceptor;
 
+import motor.community.mapper.NotificationMapper;
 import motor.community.mapper.UserMapper;
 import motor.community.model.User;
 import motor.community.model.UserExample;
+import motor.community.service.NotificationService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -23,7 +25,10 @@ import java.util.List;
 public class SessionInterceptor implements HandlerInterceptor {
 
     @Resource
-    UserMapper userMapper;
+    private UserMapper userMapper;
+
+    @Resource
+    private NotificationService notificationService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -39,8 +44,11 @@ public class SessionInterceptor implements HandlerInterceptor {
                     UserExample userExample = new UserExample();
                     userExample.createCriteria().andTokenEqualTo(token);
                     List<User> users = userMapper.selectByExample(userExample);
-
-                    if (users.size() != 0) request.getSession().setAttribute("user", users.get(0));
+                    if (users.size() != 0) {
+                        request.getSession().setAttribute("user", users.get(0));
+                        Long unreadCount = notificationService.unreadCount(users.get(0).getId());
+                        request.getSession().setAttribute("unreadCount", unreadCount);
+                    }
                     break;
                 }
             }

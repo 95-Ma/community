@@ -27,4 +27,27 @@
     COMMENT_COUNT = COMMENT_COUNT + #{commentCount}
     where id = #{id}
     </update>
+
+    <select id="selectRelated" parameterType="motor.community.model.Question" resultMap="ExtResultMap">
+        select * from QUESTION where id != #{id} and tag regexp #{tag}
+    </select>
+
+    <select id="countBySearch" parameterType="motor.community.dto.QuestionQueryDTO" resultType="java.lang.Integer">
+        select count(*) from QUESTION
+        <where>
+            <if test="search != null">
+                and title regexp #{search}
+            </if>
+        </where>
+    </select>
+    <select id="selectBySearch" parameterType="motor.community.dto.QuestionQueryDTO"
+            resultType="motor.community.model.Question">
+        select * from QUESTION
+        <where>
+            <if test="search != null">
+                and title regexp #{search}
+            </if>
+        </where>
+        order by gmt_create desc limit #{page},#{size}
+    </select>
 </mapper>

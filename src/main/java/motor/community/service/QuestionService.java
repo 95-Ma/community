@@ -1,5 +1,6 @@
 package motor.community.service;
 
+import motor.community.dto.QuestionQueryDTO;
 import motor.community.exception.CustomizeErrorCode;
 import motor.community.exception.CustomizeException;
 import motor.community.dto.PaginationDTO;
@@ -10,13 +11,16 @@ import motor.community.mapper.UserMapper;
 import motor.community.model.Question;
 import motor.community.model.QuestionExample;
 import motor.community.model.User;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 问题列表展示业务逻辑
@@ -43,11 +47,20 @@ public class QuestionService {
      * @param size 显示条数
      * @return PaginationDTO
      */
-    public PaginationDTO getAllQuestionDTO(Integer page, Integer size) {
+    public PaginationDTO getAllQuestionDTO(String search, Integer page, Integer size) {
+
+        if (StringUtils.isNotBlank(search)) {
+            String[] tags = StringUtils.split(search, " ");
+            search = Arrays.stream(tags).collect(Collectors.joining("|"));
+        }
+
+
         // 新建页码DTO对象
         PaginationDTO paginationDTO = new PaginationDTO();
-        // 获取问题列表总记录数
-        Integer totalCount = (int) questionMapper.countByExample(new QuestionExample());
+        // 根据条件获取问题列表总记录数
+        QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
+        questionQueryDTO.setSearch(search);
+        Integer totalCount = questionExtMapper.countBySearch(questionQueryDTO);
         // 对传入参数page的简单限制
         if (page < 1) {
             page = 1;
@@ -62,7 +75,11 @@ public class QuestionService {
         // 偏移位置
         Integer offset = size * (page - 1);
         // 获取问题列表（不含用户信息）
-        List<Question> questions = questionMapper.selectByExampleWithRowbounds(new QuestionExample(), new RowBounds(offset, size));
+        QuestionExample example = new QuestionExample();
+        example.setOrderByClause("gmt_create desc");
+        questionQueryDTO.setSize(size);
+        questionQueryDTO.setPage(offset);
+        List<Question> questions = questionExtMapper.selectBySearch(questionQueryDTO);
         // 新建问题DTO列表（包含用户信息）
         List<QuestionDTO> questionDTOList = new ArrayList<>();
 
@@ -75,7 +92,7 @@ public class QuestionService {
             questionDTOList.add(questionDTO);
         }
         // 将遍历获取的特定问题列表（包含用户信息）注入paginationDTO
-        paginationDTO.setQuestions(questionDTOList);
+        paginationDTO.setData(questionDTOList);
 
         return paginationDTO;
     }
@@ -116,7 +133,7 @@ public class QuestionService {
             questionDTOList.add(questionDTO);
         }
         // 将遍历获取的特定问题列表（包含用户信息）注入paginationDTO
-        paginationDTO.setQuestions(questionDTOList);
+        paginationDTO.setData(questionDTOList);
 
         return paginationDTO;
     }
@@ -182,5 +199,24 @@ public class QuestionService {
         question.setId(id);
         question.setViewCount(1);
         questionExtMapper.incView(question);
+    }
+
+    public List<QuestionDTO> selectRelated(QuestionDTO queryDTO) {
+        if (StringUtils.isBlank(queryDTO.getTag())) {
+            return new ArrayList<>();
+        }
+        String[] tags = StringUtils.split(queryDTO.getTag(), ",");
+        String regexpTag = Arrays.stream(tags).collect(Collectors.joining("|"));
+        Question question = new Question();
+        question.setId(queryDTO.getId());
+        question.setTag(regexpTag);
+
+        List<Question> questions = questionExtMapper.selectRelated(question);
+        List<QuestionDTO> questionDTOS = questions.stream().map(q -> {
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(q, questionDTO);
+            return questionDTO;
+        }).collect(Collectors.toList());
+        return questionDTOS;
     }
 }

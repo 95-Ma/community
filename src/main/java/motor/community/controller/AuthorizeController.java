@@ -1,5 +1,6 @@
 package motor.community.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import motor.community.dto.GithubUserDTO;
 import motor.community.model.User;
 import motor.community.provider.GithubProvider;
@@ -24,6 +25,7 @@ import java.util.UUID;
  * @create 2021-01-02-14:08
  */
 @Controller
+@Slf4j
 public class AuthorizeController {
 
     @Autowired
@@ -82,6 +84,7 @@ public class AuthorizeController {
             response.addCookie(new Cookie("token", token));
             return "redirect:/";
         } else {
+            log.error("callback get github error,{}", githubUserDTO);
             // 登录失败，重新登录
             return "redirect:/";
         }

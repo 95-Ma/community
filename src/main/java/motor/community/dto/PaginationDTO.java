@@ -12,9 +12,9 @@ import java.util.List;
  * @create 2021-01-06-16:01
  */
 @Data
-public class PaginationDTO {
+public class PaginationDTO<T> {
     // 展示问题列表
-    private List<QuestionDTO> questions;
+    private List<T> data;
     // 展示前一页
     private boolean showPrevious;
     // 展示首页

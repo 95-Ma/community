@@ -23,20 +23,21 @@ public class IndexController {
     /**
      * 首页控制器
      *
-     * @param request
      * @param model
-     * @param page    页数
-     * @param size    每页显示几条问题
+     * @param page  页数
+     * @param size  每页显示几条问题
      * @return 首页
      */
     @GetMapping("/")
     public String index(Model model,
                         @RequestParam(value = "page", defaultValue = "1") Integer page,
-                        @RequestParam(value = "size", defaultValue = "5") Integer size) {
+                        @RequestParam(value = "size", defaultValue = "5") Integer size,
+                        @RequestParam(value = "search", required = false) String search) {
         // 根据page和size返回页码DTO对象
-        PaginationDTO pagination = questionService.getAllQuestionDTO(page, size);
+        PaginationDTO pagination = questionService.getAllQuestionDTO(search, page, size);
         // 将页码DTO对象存放到Request域中
         model.addAttribute("pagination", pagination);
+        model.addAttribute("search", search);
         // 返回首页
         return "index";
     }

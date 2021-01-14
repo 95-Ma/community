@@ -13,11 +13,13 @@ import java.lang.reflect.Member;
  * @create 2021-01-10-16:39
  */
 @Data
-public class ResultDTO {
+public class ResultDTO<T> {
     // 状态码
     private Integer code;
     // 响应信息
     private String message;
+    // 回传数据
+    private T data;
 
     public static ResultDTO errorOf(Integer code, String message) {
         ResultDTO resultDTO = new ResultDTO();
@@ -34,6 +36,9 @@ public class ResultDTO {
         return errorOf(e.getCode(), e.getMessage());
     }
 
+    /**
+     * 返回成功信息
+     */
     public static ResultDTO okOf() {
         ResultDTO resultDTO = new ResultDTO();
         resultDTO.setCode(200);
@@ -41,5 +46,14 @@ public class ResultDTO {
         return resultDTO;
     }
 
-
+    /**
+     * 返回成功信息并携带回传数据
+     */
+    public static <T> ResultDTO okOf(T t) {
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setCode(200);
+        resultDTO.setMessage("请求成功");
+        resultDTO.setData(t);
+        return resultDTO;
+    }
 }

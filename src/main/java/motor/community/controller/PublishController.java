@@ -1,9 +1,11 @@
 package motor.community.controller;
 
+import motor.community.cache.TagCache;
 import motor.community.dto.QuestionDTO;
 import motor.community.model.Question;
 import motor.community.model.User;
 import motor.community.service.QuestionService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,11 +41,13 @@ public class PublishController {
         model.addAttribute("description", question.getDescription());
         model.addAttribute("tag", question.getTag());
         model.addAttribute("id", question.getId());
+        model.addAttribute("tags", TagCache.get());
         return "publish";
     }
 
     @GetMapping("/publish")
-    public String publish() {
+    public String publish(Model model) {
+        model.addAttribute("tags", TagCache.get());
         return "publish";
     }
 
@@ -78,10 +82,17 @@ public class PublishController {
             return "publish";
         }
 
+        String invalid = TagCache.filterInvalid(tag);
+        if (StringUtils.isNotBlank(invalid)) {
+            model.addAttribute("error", "输入非法标签" + invalid);
+            return "publish";
+        }
+
         // 用户未登录时编辑发起问题内容提交后，数据回显
         model.addAttribute("title", title);
         model.addAttribute("description", description);
         model.addAttribute("tag", tag);
+        model.addAttribute("tags", TagCache.get());
 
         // 获取Session域中的用户信息
         User user = (User) request.getSession().getAttribute("user");

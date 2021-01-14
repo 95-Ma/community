@@ -29,7 +29,7 @@
             <h3><span class="glyphicon glyphicon-list" aria-hidden="true"></span> 发现</h3>
 
             <!-- 遍历问题列表-->
-            <div class="media" th:each="question : ${pagination.questions}">
+            <div class="media" th:each="question : ${pagination.data}">
                 <div class="media-left">
                     <!-- 用户头像-->
                     <a href="#">
@@ -54,13 +54,13 @@
                 <ul class="pagination">
                     <!-- 跳转首页-->
                     <li th:if="${pagination.showFirstPage}">
-                        <a th:href="@{/(page=1)}" aria-label="Previous">
+                        <a th:href="@{/(page=1,search=${search})}" aria-label="Previous">
                             <span aria-hidden="true">&lt;&lt;</span>
                         </a>
                     </li>
                     <!-- 跳转上一页-->
                     <li th:if="${pagination.showPrevious}">
-                        <a th:href="@{/(page=${pagination.page - 1})}"
+                        <a th:href="@{/(page=${pagination.page - 1},search=${search})}"
                            aria-label="Previous">
                             <span aria-hidden="true">&lt;</span>
                         </a>
@@ -68,19 +68,19 @@
 
                     <!-- 遍历页码集，展示并判断页码是否为当前页码，如果是则高亮显示-->
                     <li th:each="page : ${pagination.pages}" th:class="${pagination.page == page}? 'active' : ''">
-                        <a th:href="@{/(page=${page})}" th:text="${page}"></a>
+                        <a th:href="@{/(page=${page},search=${search})}" th:text="${page}"></a>
                     </li>
 
                     <!-- 跳转下一页-->
                     <li th:if="${pagination.showNext}">
-                        <a th:href="@{/(page=${pagination.page +1 })}"
+                        <a th:href="@{/(page=${pagination.page +1 },search=${search})}"
                            aria-label="Previous">
                             <span aria-hidden="true">&gt;</span>
                         </a>
                     </li>
                     <!-- 跳转尾页-->
                     <li th:if="${pagination.showEndPage}">
-                        <a th:href="@{/(page=${pagination.totalPage})}"
+                        <a th:href="@{/(page=${pagination.totalPage},search=${search})}"
                            aria-label="Previous">
                             <span aria-hidden="true">&gt;&gt;</span>
                         </a>
@@ -97,5 +97,6 @@
         </div>
     </div>
 </div>
+<div th:insert="~{footer :: foot}"></div>
 </body>
 </html>
